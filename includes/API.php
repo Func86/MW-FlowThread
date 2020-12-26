@@ -213,7 +213,7 @@ class API extends \ApiBase {
 			// By fetching the post object, we also validate the id
 			$postList = $main->getVal('postid');
 			$postList = $this->parsePostList($postList);
-			$user = $this->getUser()
+			$user = $this->getUser();
 
 			switch ($action) {
 			case 'list':
