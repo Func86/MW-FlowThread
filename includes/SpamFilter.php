@@ -141,7 +141,6 @@ class SpamFilter {
 
 	public static function validate($text, $poster, $wikitext) {
 		$blacklist = self::getBlackList();
-		$spammed = false;
 		$ret = array(
 			'good' => true,
 		);
@@ -177,6 +176,7 @@ class SpamFilter {
 
 				// Mark as bad
 				$ret['good'] = false;
+				break;
 			}
 		}
 

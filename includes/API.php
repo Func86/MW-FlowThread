@@ -319,6 +319,7 @@ class API extends \ApiBase {
 					$this->dieWithError(['apierror-commentcontrol', $title]);
 				}
 
+				$user->pingLimiter('folowthread');
 				// Construct the object first without setting the text
 				// As we need to use some useful functions on the post object
 				$data = array(
