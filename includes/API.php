@@ -213,6 +213,7 @@ class API extends \ApiBase {
 			// By fetching the post object, we also validate the id
 			$postList = $main->getVal('postid');
 			$postList = $this->parsePostList($postList);
+			$user = $this->getUser()
 
 			switch ($action) {
 			case 'list':
@@ -228,7 +229,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->setUserAttitude($this->getUser(), Post::ATTITUDE_LIKE);
+					$post->setUserAttitude($user, Post::ATTITUDE_LIKE);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -248,7 +249,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->setUserAttitude($this->getUser(), Post::ATTITUDE_REPORT);
+					$post->setUserAttitude($user, Post::ATTITUDE_REPORT);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -258,7 +259,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->delete($this->getUser());
+					$post->delete($user);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -268,7 +269,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->recover($this->getUser());
+					$post->recover($user);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -278,7 +279,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->markchecked($this->getUser());
+					$post->markchecked($user);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -288,7 +289,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->erase($this->getUser());
+					$post->erase($user);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -303,7 +304,7 @@ class API extends \ApiBase {
 				}
 
 				// Permission check
-				Post::checkIfCanPost($this->getUser());
+				Post::checkIfCanPost($user);
 
 				$title = \Title::newFromId($page);
 				if (!$title) {
@@ -325,8 +326,8 @@ class API extends \ApiBase {
 				$data = array(
 					'id' => null,
 					'pageid' => $page,
-					'userid' => $this->getUser()->getId(),
-					'username' => $this->getUser()->getName(),
+					'userid' => $user->getId(),
+					'username' => $user->getName(),
 					'text' => '', // Will be changed later
 					'parentid' => $postList && count($postList) ? $postList[0]->id : null,
 					'status' => Post::STATUS_NORMAL, // Will be changed later
@@ -337,7 +338,7 @@ class API extends \ApiBase {
 
 				// Need to feed this to spam filter
 				$useWikitext = $this->getMain()->getCheck('wikitext');
-				$filterResult = SpamFilter::validate($text, $this->getUser(), $useWikitext);
+				$filterResult = SpamFilter::validate($text, $user, $useWikitext);
 				$text = $filterResult['text'];
 
 				// We need to do this step, as we might need to transform
@@ -362,9 +363,9 @@ class API extends \ApiBase {
 				$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 
 				// Set options for parsing
-				$opt = new \ParserOptions($this->getUser());
+				$opt = new \ParserOptions($user);
 
-				$text = $parser->preSaveTransform($text, $title, $this->getUser(), $opt);
+				$text = $parser->preSaveTransform($text, $title, $user, $opt);
 				$output = $parser->parse($text, $title, $opt);
 				$text = $output->getText(['enableSectionEditLinks' => false]); // Edit button will not work!
 
