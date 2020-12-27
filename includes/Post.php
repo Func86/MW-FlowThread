@@ -190,7 +190,7 @@ class Post {
 		$logEntry = new \ManualLogEntry('comments', $subtype);
 		$logEntry->setPerformer($initiator);
 		$logEntry->setTarget(\Title::newFromId($this->pageid));
-		$param = []
+		$param = [];
 		$param['4::username'] = $this->username;
 		if ($count_child !== null) $param['5::children'] = $count_child;
 		$logEntry->setParameters($param);
