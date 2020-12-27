@@ -279,8 +279,7 @@ class Post {
 	}
 
 	// Recursively delete a thread and its children
-	// FIXME: Should be somehow protected
-	public function eraseSilently(DBConnRef $db) {
+	private function eraseSilently(DBConnRef $db) {
 		$counter = 1;
 
 		$db->delete('FlowThread', array(
