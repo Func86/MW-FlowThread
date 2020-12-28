@@ -112,6 +112,16 @@ class Hooks {
 		return true;
 	}
 
+	public static function onRenameUserComplete( $uid, $oldName, $newName ) {
+		$dbw = wfGetDB(DB_MASTER);
+		$dbw->update('FlowThread', [
+				'flowthread_userid' => $uid
+			], [
+				'flowthread_username' => $newName
+			]
+		);
+	}
+
 	public static function onBaseTemplateToolbox(\BaseTemplate &$baseTemplate, array &$toolbox) {
 		if (isset($baseTemplate->data['nav_urls']['usercomments'])
 			&& $baseTemplate->data['nav_urls']['usercomments']) {

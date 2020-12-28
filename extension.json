@@ -45,6 +45,9 @@
     "ArticleUndelete": [
       "FlowThread\\Hooks::onArticleUndelete"
     ],
+    "RenameUserComplete": [
+      "FlowThread\\Hooks::onRenameUserComplete"
+    ],
     "BeforeCreateEchoEvent": [
       "FlowThread\\EchoHooks::onBeforeCreateEchoEvent"
     ],
