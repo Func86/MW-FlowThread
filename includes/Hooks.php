@@ -122,6 +122,11 @@ class Hooks {
 		);
 	}
 
+	public static function onMergeAccountFields( &$updateFields ) {
+		$updateFields[] = [ 'FlowThread', 'flowthread_userid', 'flowthread_username' ];
+		return true;
+	}
+
 	public static function onBaseTemplateToolbox(\BaseTemplate &$baseTemplate, array &$toolbox) {
 		if (isset($baseTemplate->data['nav_urls']['usercomments'])
 			&& $baseTemplate->data['nav_urls']['usercomments']) {
