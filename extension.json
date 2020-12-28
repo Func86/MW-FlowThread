@@ -48,7 +48,7 @@
     "RenameUserComplete": [
       "FlowThread\\Hooks::onRenameUserComplete"
     ],
-    "MergeAccountFromTo": [
+    "MergeAccountFields": [
       "FlowThread\\Hooks::onMergeAccountFields"
     ],
     "BeforeCreateEchoEvent": [
