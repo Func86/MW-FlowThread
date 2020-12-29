@@ -434,6 +434,7 @@ class API extends \ApiBase {
 					'post'
 				],
 				\ApiBase::PARAM_DFLT => 'post',
+				\ApiBase::PARAM_REQUIRED => true,
 			),
 			'pageid' => array(
 				\ApiBase::PARAM_TYPE => 'integer',
