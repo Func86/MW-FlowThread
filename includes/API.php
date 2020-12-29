@@ -422,8 +422,18 @@ class API extends \ApiBase {
 	public function getAllowedParams() {
 		return array(
 			'type' => array(
-				\ApiBase::PARAM_TYPE => 'string',
-				\ApiBase::PARAM_REQUIRED => true,
+				\ApiBase::PARAM_TYPE => [
+					'list',
+					'like',
+					'dislike',
+					'report',
+					'delete',
+					'recover',
+					'erase',
+					'markchecked',
+					'post'
+				],
+				\ApiBase::PARAM_DFLT => 'post',
 			),
 			'pageid' => array(
 				\ApiBase::PARAM_TYPE => 'integer',
