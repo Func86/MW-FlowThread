@@ -231,7 +231,7 @@ class API extends \ApiBase {
 					$this->dieNoParam('postid');
 				}
 				foreach ($postList as $post) {
-					$post->setUserAttitude($this->getUser(), Post::ATTITUDE_NORMAL);
+					$post->setUserAttitude($user, Post::ATTITUDE_NORMAL);
 				}
 				$this->getResult()->addValue(null, $this->getModuleName(), '');
 				break;
@@ -417,6 +417,7 @@ class API extends \ApiBase {
 			'type' => array(
 				\ApiBase::PARAM_TYPE => [
 					'list',
+					'listall',
 					'like',
 					'dislike',
 					'report',
