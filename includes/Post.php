@@ -374,18 +374,16 @@ class Post {
 	}
 
 	public function isDeleted() {
-		// This include spam and deleted
-		return $this->status !== static::STATUS_NORMAL;
+		// This should only include spam and deleted
+		return $this->status === self::STATUS_DELETED || $this->status === STATUS_SPAM;
 	}
 
 	public function isVisible() {
 		if ($this->isDeleted()) {
 			return false;
 		}
-		if ($this->parentid === null) {
-			return true;
-		}
-		return $this->getParent()->isVisible();
+		// Update from older version should perform SQL to update the status
+		return !($this->status & self::STATUS_ARCHIVED);
 	}
 
 	private function invalidate() {

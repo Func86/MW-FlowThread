@@ -55,6 +55,8 @@ class Query {
 
 		switch ($this->filter) {
 		case static::FILTER_ALL:
+			$status_spam = Post::STATUS_SPAM;
+			$cond[] = "NOT flowthread_status&{$status_spam}";
 			break;
 		case static::FILTER_NORMAL:
 			$cond['flowthread_status'] = Post::STATUS_NORMAL;
