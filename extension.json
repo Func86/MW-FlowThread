@@ -203,6 +203,12 @@
 			"PopularPostThreshold": 1,
 			"MaxNestLevel": 3
 		},
+		"FlowThreadAllowedNamespace": [
+			NS_MAIN,
+			NS_USER,
+			NS_PROJECT,
+			NS_HELP
+		],
 		"TriggerFlowThreadHooks": true,
 		"FlowThreadEnforcePost": false
 	},
