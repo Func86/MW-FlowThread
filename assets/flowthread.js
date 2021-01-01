@@ -55,11 +55,12 @@ function createThread(post) {
 
 function reloadComments(offset) {
   offset = offset || 0;
+  var pageid = mw.config.get('wgArticleId');
   var api = new mw.Api();
   api.get({
-    action: 'flowthread',
-    type: 'list',
-    pageid: mw.config.get('wgArticleId'),
+    action: 'query',
+    prop: 'comments',
+    pageids: pageid,
     offset: offset,
     utf8: '',
   }).done(function(data) {
@@ -67,13 +68,13 @@ function reloadComments(offset) {
     $('.comment-container').html('');
     var canpostbak = canpost;
     canpost = false; // No reply for topped comments
-    data.flowthread.popular.forEach(function(item) {
+    data.query.pages.comments[pageid].popular.forEach(function(item) {
       var obj = createThread(item);
       obj.markAsPopular();
       $('.comment-container-top').removeAttr('disabled').append(obj.object);
     });
     canpost = canpostbak;
-    data.flowthread.posts.forEach(function(item) {
+    data.query.pages.comments[pageid].posts.forEach(function(item) {
       var obj = createThread(item);
       if (item.parentid === '') {
         $('.comment-container').append(obj.object);
@@ -82,7 +83,7 @@ function reloadComments(offset) {
       }
     });
     pager.current = Math.floor(offset / 10);
-    pager.count = Math.ceil(data.flowthread.count / 10);
+    pager.count = Math.ceil(data.query.pages.comments[pageid].count / 10);
     pager.repaint();
 
     if (location.hash.substring(0, 9) === '#comment-') {
