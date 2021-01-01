@@ -88,6 +88,7 @@ class API extends \ApiBase {
 		return $ret;
 	}
 
+	// deprecated
 	private function executeList() {
 		$page = $this->getMain()->getVal('pageid');
 		if (!$page) {
@@ -96,6 +97,7 @@ class API extends \ApiBase {
 		$this->getResult()->addValue(null, $this->getModuleName(), $this->fetchPosts($page));
 	}
 
+	// deprecated
 	private function executeListAll() {
 		$query = new Query();
 		$query->threadMode = false;
@@ -413,8 +415,8 @@ class API extends \ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'type' => array(
+		return [
+			'type' => [
 				\ApiBase::PARAM_TYPE => [
 					'list',
 					'listall',
@@ -427,28 +429,32 @@ class API extends \ApiBase {
 					'markchecked',
 					'post'
 				],
+				\ApiBase::PARAM_DEPRECATED_VALUES => [
+					'list' => true,
+					'listall' => true
+				],
 				\ApiBase::PARAM_DFLT => 'post',
 				\ApiBase::PARAM_REQUIRED => true,
-			),
-			'pageid' => array(
+			],
+			'pageid' => [
 				\ApiBase::PARAM_TYPE => 'integer',
-			),
-			'postid' => array(
+			],
+			'postid' => [
 				\ApiBase::PARAM_TYPE => 'string',
-			),
-			'content' => array(
+			],
+			'content' => [
 				\ApiBase::PARAM_TYPE => 'string',
-			),
-			'wikitext' => array(
+			],
+			'wikitext' => [
 				\ApiBase::PARAM_TYPE => 'boolean',
-			),
-			'offset' => array(
+			],
+			'offset' => [
 				\ApiBase::PARAM_TYPE => 'integer',
-			),
-			'limit' => array(
+			],
+			'limit' => [
 				\ApiBase::PARAM_TYPE => 'integer',
-			),
-		);
+			],
+		];
 	}
 
 	public function getExamplesMessages() {

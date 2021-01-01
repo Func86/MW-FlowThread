@@ -182,4 +182,32 @@ class Helper {
 
 		return true;
 	}
+
+	public static function convertPosts(array $posts, \User $user, $needTitle = false, $priviledged = false) {
+		$attTable = self::batchGetUserAttitude($user, $posts);
+		$ret = [];
+		foreach ($posts as $post) {
+			$json = [
+				'id' => $post->id->getHex(),
+				'userid' => $post->userid,
+				'username' => $post->username,
+				'text' => $post->text,
+				'timestamp' => $post->id->getTimestamp(),
+				'parentid' => $post->parentid ? $post->parentid->getHex() : '',
+				'like' => $post->getFavorCount(),
+				'myatt' => $attTable[$post->id->getHex()],
+			];
+			if ($needTitle) {
+				$title = \Title::newFromId($post->pageid);
+				$json['pageid'] = $post->pageid;
+				$json['title'] = $title ? $title->getPrefixedText() : null;
+			}
+			if ($priviledged) {
+				$json['report'] = $post->getReportCount();
+				$json['status'] = $post->status;
+			}
+			$ret[] = $json;
+		}
+		return $ret;
+	}
 }
