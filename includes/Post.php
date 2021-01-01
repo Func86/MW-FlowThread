@@ -182,6 +182,9 @@ class Post {
 		if ($user->getId() == 0) {
 			throw new \Exception("Must login first");
 		}
+		if ($this->isArchived() || ($this->isDeleted() && !$this->canPerformAdmin($user))) {
+			throw new \Exception("Vote operations is not allowed on invisable comment");
+		}
 	}
 
 	private function publishSimpleLog($subtype, \User $initiator, $count_child = null) {
@@ -241,6 +244,10 @@ class Post {
 			throw new \Exception("Post is not deleted");
 		}
 
+		if ($this->isArchived()) {
+			throw new \Exception("Recover is not allowed on archived comment");
+		}
+
 		// Mark status as normal
 		$this->switchStatus(static::STATUS_NORMAL);
 
@@ -261,8 +268,8 @@ class Post {
 		self::checkIfAdminFull($user);
 
 		// Mark-as-checked is invalid for a deleted post
-		if ($this->isDeleted()) {
-			throw new \Exception("Post is deleted");
+		if ($this->isDeleted() || $this->isArchived()) {
+			throw new \Exception("Post is deleted or archived");
 		}
 
 		// Write a log
@@ -288,8 +295,8 @@ class Post {
 		}
 
 		// Delete is not valid for deleted post
-		if ($this->isDeleted()) {
-			throw new \Exception("Post is already deleted");
+		if ($this->isDeleted() || $this->isArchived()) {
+			throw new \Exception("Post is already deleted or archived");
 		}
 
 		PopularPosts::invalidateCache($this);
@@ -338,13 +345,15 @@ class Post {
 			throw new \Exception("Post must be deleted first before erasing");
 		}
 
+		if ($this->isArchived()) {
+			throw new \Exception("Erase is not allowed on archived comment");
+		}
+
 		$dbw = wfGetDB(DB_MASTER);
 		$counter = $this->eraseSilently($dbw);
 
 		// Add to log
 		$this->publishSimpleLog('erase', $user, $counter - 1);
-		$logId = $logEntry->insert();
-		$logEntry->publish($logId, 'udp');
 
 		$this->invalidate();
 	}
@@ -374,18 +383,20 @@ class Post {
 	}
 
 	public function isDeleted() {
-		// This include spam and deleted
-		return $this->status !== static::STATUS_NORMAL;
+		// This should only include spam and deleted
+		return $this->status === self::STATUS_DELETED || $this->status === STATUS_SPAM;
+	}
+
+	public function isArchived() {
+		return $this->status & self::STATUS_ARCHIVED;
 	}
 
 	public function isVisible() {
 		if ($this->isDeleted()) {
 			return false;
 		}
-		if ($this->parentid === null) {
-			return true;
-		}
-		return $this->getParent()->isVisible();
+		// Update from older version should perform SQL to update the status
+		return !$this->isArchived();
 	}
 
 	private function invalidate() {
