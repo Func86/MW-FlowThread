@@ -189,8 +189,8 @@ function loadComments() {
 	var query = getParams();
 
 	var apiQuery = $.extend({
-		action: 'flowthread',
-		type: 'listall',
+		action: 'query',
+		list: 'allcomments',
 		utf8: '',
 	}, query);
 	// "All" comments actually exclude deleted and spam comments!
@@ -200,14 +200,20 @@ function loadComments() {
 		apiQuery.title = apiQuery.page;
 		delete apiQuery.page;
 	}
+	$.each(['filter', 'pageid', 'title', 'user', 'keyword', 'dir', 'limit', 'offset'], function(index, param) {
+		if (param in apiQuery) {
+			apiQuery['cl' + param] = apiQuery[param];
+			delete apiQuery[param];
+		}
+	});
 
 	var api = new mw.Api();
 	api.get(apiQuery).done(function(data) {
 		$('.comment-container').html('');
-		data.flowthread.posts.forEach(function(item) {
+		data.query.allcomments.posts.forEach(function(item) {
 			$('.comment-container').append(createThread(item).object);
 		});
-		var more = 'more' in data.flowthread;
+		var more = 'more' in data.query.allcomments;
 		var prev = $('#pager-prev');
 		var next = $('#pager-next');
 		var first = $('#pager-first');

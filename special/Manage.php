@@ -47,8 +47,6 @@ class SpecialManage extends \SpecialPage {
 			$this->limit = 500;
 		}
 
-		global $wgScript;
-
 		$this->setHeaders();
 		$this->outputHeader();
 		$output = $this->getOutput();
