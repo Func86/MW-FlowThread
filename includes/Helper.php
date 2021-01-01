@@ -137,18 +137,16 @@ class Helper {
 		return $mentioned;
 	}
 
-	public static function getFilteredNamespace() {
-		$ret = array(
-			NS_MEDIAWIKI,
-			NS_TEMPLATE,
-			NS_CATEGORY,
-			NS_FILE,
-		);
-		if (defined('NS_MODULE')) {
-			$ret[] = NS_MODULE;
-		}
+	public static function getAllowedNamespace() {
+		global $wgFlowThreadAllowedNamespace;
+		$ret = $wgFlowThreadAllowedNamespace;
 
-		return $ret;
+		return is_array($ret) ? $ret : array(
+			NS_MAIN,
+			NS_USER,
+			NS_PROJECT,
+			NS_HELP
+		);
 	}
 
 	public static function canEverPostOnTitle(\Title $title) {
@@ -175,8 +173,8 @@ class Helper {
 			return false;
 		}
 
-		// Blacklist several namespace
-		if (in_array($title->getNamespace(), self::getFilteredNamespace())) {
+		// Namespace whitelist
+		if (!in_array($title->getNamespace(), self::getAllowedNamespace())) {
 			return false;
 		}
 
