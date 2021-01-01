@@ -450,9 +450,11 @@ class API extends \ApiBase {
 			],
 			'offset' => [
 				\ApiBase::PARAM_TYPE => 'integer',
+				\ApiBase::PARAM_DEPRECATED => true
 			],
 			'limit' => [
 				\ApiBase::PARAM_TYPE => 'integer',
+				\ApiBase::PARAM_DEPRECATED => true
 			],
 		];
 	}
