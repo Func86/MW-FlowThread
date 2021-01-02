@@ -363,11 +363,14 @@ class API extends \ApiBase {
 
 				// Set options for parsing
 				$opt = new \ParserOptions($user);
-				$opt->setEditSection(false); // Edit button will not work!
 
 				$text = $parser->preSaveTransform($text, $title, $user, $opt);
 				$output = $parser->parse($text, $title, $opt);
-				$text = $output->getText();
+				$text = $output->getText([
+					'allowTOC' => false,
+					'enableSectionEditLinks' => false, // Disable edit button
+					'unwrap' => true // Return text without a wrapper div
+				]);
 
 				// Get all mentioned user
 				$mentioned = Helper::generateMentionedList($output, $postObject);
