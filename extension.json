@@ -17,6 +17,8 @@
 	"AutoloadClasses": {
 		"FlowThread\\Hooks": "includes/Hooks.php",
 		"FlowThread\\API": "includes/API.php",
+		"FlowThread\\ApiQueryAllComments": "includes/ApiQueryAllComments.php",
+		"FlowThread\\ApiQueryComments": "includes/ApiQueryComments.php",
 		"FlowThread\\Post": "includes/Post.php",
 		"FlowThread\\Query": "includes/Query.php",
 		"FlowThread\\UID": "includes/UID.php",
@@ -155,6 +157,12 @@
 	},
 	"APIModules": {
 		"flowthread": "FlowThread\\API"
+	},
+	"APIPropModules": {
+		"comments": "FlowThread\\ApiQueryComments"
+	},
+	"APIListModules": {
+		"allcomments": "FlowThread\\ApiQueryAllComments"
 	},
 	"AvailableRights": [
 		"comment",
