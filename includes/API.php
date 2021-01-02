@@ -358,12 +358,15 @@ class API extends \ApiBase {
 
 				// Set options for parsing
 				$opt = \ParserOptions::newCanonical($user);
-				$opt->setWrapOutputClass(''); // Set empty class name to avoid div warpper
 				$opt->enableLimitReport(false);
 
 				$text = $parser->preSaveTransform($text, $title, $user, $opt);
 				$output = $parser->parse($text, $title, $opt);
-				$text = $output->getText(['enableSectionEditLinks' => false]); // Edit button will not work!
+				$text = $output->getText([
+					'allowTOC' => false,
+					'enableSectionEditLinks' => false, // Disable edit button
+					'unwrap' => true // Return text without a wrapper div
+				]);
 
 				// Get all mentioned user
 				$mentioned = Helper::generateMentionedList($output, $postObject);
