@@ -177,14 +177,6 @@ class API extends \ApiBase {
 		$this->getResult()->addValue(null, $this->getModuleName(), $obj);
 	}
 
-	public static function stripWrapper( $html ) {
-		$m = [];
-		if ( preg_match( '/^<div class="mw-parser-output">(.*)<\/div>$/sU', $html, $m ) ) {
-			$html = $m[1];
-		}
-		return $html;
-	}
-
 	public function execute() {
 		$main = $this->getMain();
 		$action = $main->getVal('type');
@@ -360,7 +352,8 @@ class API extends \ApiBase {
 				$parser = new \Parser();
 
 				// Set options for parsing
-				$opt = new \ParserOptions($user);
+				$opt = \ParserOptions::newCanonical($user);
+				$opt->enableLimitReport(false);
 
 				$text = $parser->preSaveTransform($text, $title, $user, $opt);
 				$output = $parser->parse($text, $title, $opt);
@@ -377,8 +370,7 @@ class API extends \ApiBase {
 				unset($opt);
 				unset($output);
 
-				// Useless p wrapper
-				$text = self::stripWrapper($text);
+				// Strip p wrapper
 				$text = \Parser::stripOuterParagraph($text);
 				$text = SpamFilter::sanitize($text);
 
