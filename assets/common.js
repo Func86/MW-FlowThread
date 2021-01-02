@@ -242,10 +242,14 @@ function ReplyBox(thread) {
 			var val = self.getValue().trim();
 			if (val) {
 				var api = new mw.Api();
-				api.get({
+				api.post({
 					action: 'parse',
 					title: (thread && thread.post.title) || mw.config.get('wgTitle'),
 					prop: 'text',
+					wrapoutputclass: '',
+					disablelimitreport: true,
+					disableeditsection: true,
+					disabletoc: true,
 					preview: true,
 					text: val,
 					pst: true,
