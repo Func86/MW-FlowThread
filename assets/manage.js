@@ -241,6 +241,7 @@ function loadComments() {
 $('#pager-prev,#pager-next,#pager-first,#pager-last').on('click', function(event) {
 	// Pagers are "hi-jacked" by JS and does not actually cause page fresh
 	event.preventDefault();
+	if (this.className === 'pager-disable') return;
 	// Still change the URL
 	history.pushState({}, '', this.href);
 	// Trigger a comment reload, so it looks like the page has been updated
