@@ -61,20 +61,20 @@ function reloadComments(offset) {
 		action: 'query',
 		prop: 'comments',
 		pageids: pageid,
-		offset: offset,
+		fcoffset: offset,
 		utf8: '',
 	}).done(function(data) {
 		$('.comment-container-top').html('<div>' + mw.msg('flowthread-ui-popular') + '</div>').attr('disabled', '');
 		$('.comment-container').html('');
 		var canpostbak = canpost;
 		canpost = false; // No reply for topped comments
-		data.query.pages.comments[pageid].popular.forEach(function(item) {
+		data.query.pages[pageid].comments.popular.forEach(function(item) {
 			var obj = createThread(item);
 			obj.markAsPopular();
 			$('.comment-container-top').removeAttr('disabled').append(obj.object);
 		});
 		canpost = canpostbak;
-		data.query.pages.comments[pageid].posts.forEach(function(item) {
+		data.query.pages[pageid].comments.posts.forEach(function(item) {
 			var obj = createThread(item);
 			if (item.parentid === '') {
 				$('.comment-container').append(obj.object);
@@ -83,7 +83,7 @@ function reloadComments(offset) {
 			}
 		});
 		pager.current = Math.floor(offset / 10);
-		pager.count = Math.ceil(data.query.pages.comments[pageid].count / 10);
+		pager.count = Math.ceil(data.query.pages[pageid].comments.count / 10);
 		pager.repaint();
 
 		if (location.hash.substring(0, 9) === '#comment-') {
