@@ -120,7 +120,7 @@
 	"apihelp-query+allcomments-param-dir": "Specify the comment should be sort in which direction.",
 	"apihelp-query+allcomments-param-limit": "Number of posts to list.",
 	"apihelp-query+allcomments-param-offset": "Offset to start listing posts.",
-	"apihelp-query+allcomments-param-pager": '<span style="color: red;">Internal.</span> Used to generate link points to previous page for comment management.',
+	"apihelp-query+allcomments-param-pager": "<span style=\"color: red;\">Internal.</span> Used to generate link points to previous page for comment management.",
 
 	"sidebar-section-extension": "Extension",
 	"sidebar-usercomments": "User Comments",
