@@ -11,10 +11,16 @@ class ApiQueryAllComments extends \ApiQueryBase {
 		$params = $this->extractRequestParams();
 		$this->requireMaxOneParameter($params, 'pageid', 'title');
 
+		$priviledged = true;
 		$query = new Query();
 		$query->threadMode = false;
 
-		$priviledged = true;
+		if ( $params['continue'] !== null ) {
+			$cont = explode('|', $params['continue']);
+			$this->dieContinueUsageIf(count($cont) != 1);
+			$query->continue = $cont[0];
+		}
+
 		$filter = $params['filter'];
 		if ($filter === 'all') {
 			$query->filter = Query::FILTER_ALL;
@@ -49,8 +55,9 @@ class ApiQueryAllComments extends \ApiQueryBase {
 		}
 		$query->dir = $params['dir'] === 'newer' ? 'newer' : 'older';
 		$limit = isset($params['limit']) ? $params['limit'] : 10;
-		$query->limit = $limit + 1;
+		$query->limit = $limit;
 		$query->offset = isset($params['offset']) ? $params['offset'] : 0;
+		$query->internal = isset($params['pager']);
 
 		// Check if the user is allowed to do priviledged queries.
 		if ($priviledged) {
@@ -63,11 +70,9 @@ class ApiQueryAllComments extends \ApiQueryBase {
 		/** @var Post[] $posts */
 		$posts = $query->posts;
 
-		// We fetched one extra row. If it exists in response, then we know we have more to fetch.
-		$more = false;
-		if (count($posts) > $limit) {
-			$more = true;
-			array_pop($posts);
+		// If there are more can be fetch.
+		if (isset($query->pager['next'])) {
+			$this->setContinueEnumParameter('continue', $query->pager['nextid']);
 		}
 
 		// For un-priviledged users, do sanitisation
@@ -81,7 +86,7 @@ class ApiQueryAllComments extends \ApiQueryBase {
 
 		$comments = Helper::convertPosts($posts, $this->getUser(), true, $priviledged);
 		$obj = [
-			"more" => $more,
+			"pager" => $query->pager,
 			"posts" => $comments,
 		];
 		$this->getResult()->addValue('query', $this->getModuleName(), $obj);
@@ -118,6 +123,12 @@ class ApiQueryAllComments extends \ApiQueryBase {
 					'older'
 				],
 				\ApiBase::PARAM_DFLT => 'newer'
+			],
+			'pager' => [ // Internal use
+				\ApiBase::PARAM_TYPE => 'boolean'
+			],
+			'continue' => [
+				\ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
 			],
 			'limit' => [
 				\ApiBase::PARAM_TYPE => 'limit',
