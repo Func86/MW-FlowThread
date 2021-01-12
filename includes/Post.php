@@ -386,7 +386,7 @@ class Post {
 
 	public function isDeleted() {
 		// This should only include spam and deleted
-		return $this->status === self::STATUS_DELETED || $this->status === STATUS_SPAM;
+		return $this->status === self::STATUS_DELETED || $this->status === self::STATUS_SPAM;
 	}
 
 	public function isArchived() {
