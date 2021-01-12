@@ -167,13 +167,15 @@ function getParams() {
 	// Deliberate global value update
 	filter = mw.util.getParamValue('filter') || 'all';
 	deleted = filter === 'deleted' || filter == 'spam';
-	var offset = parseInt(mw.util.getParamValue('offset')) || 0;
 	var limit = parseInt(mw.util.getParamValue('limit')) || 20;
 	var query = {
 		filter: filter,
-		offset: offset,
 		limit: limit,
 	};
+	var from = mw.util.getParamValue('from');
+	var offset = parseInt(mw.util.getParamValue('offset'));
+	if (from) query.from = from;
+	else if (offset) query.offset = offset;
 	var page = mw.util.getParamValue('page');
 	if (page) query.page = page;
 	var user = mw.util.getParamValue('user');
@@ -196,11 +198,14 @@ function loadComments() {
 	// "All" comments actually exclude deleted and spam comments!
 	if (apiQuery.filter == 'all') apiQuery.filter = 'normal';
 	apiQuery.dir = apiQuery.dir === 'prev' ? 'newer' : 'older';
-	if ('page' in apiQuery) {
-		apiQuery.title = apiQuery.page;
-		delete apiQuery.page;
-	}
-	$.each(['filter', 'pageid', 'title', 'user', 'keyword', 'dir', 'limit', 'offset'], function(index, param) {
+	$.each({page: 'title', from: 'continue'}, function(from, to) {
+		if (from in apiQuery) {
+			apiQuery[to] = apiQuery[from];
+			delete apiQuery[from];
+		}
+	});
+	apiQuery.pager = true;
+	$.each(['filter', 'title', 'user', 'keyword', 'dir', 'limit', 'offset', 'continue', 'pager'], function(index, param) {
 		if (param in apiQuery) {
 			apiQuery['cl' + param] = apiQuery[param];
 			delete apiQuery[param];
@@ -209,11 +214,12 @@ function loadComments() {
 
 	var api = new mw.Api();
 	api.get(apiQuery).done(function(data) {
+		var res = data.query.allcomments;
 		$('.comment-container').html('');
-		data.query.allcomments.posts.forEach(function(item) {
+		res.posts.forEach(function(item) {
 			$('.comment-container').append(createThread(item).object);
 		});
-		var more = 'more' in data.query.allcomments;
+		var hasprev = 'prev' in res.pager, hasnext = 'next' in res.pager;
 		var prev = $('#pager-prev');
 		var next = $('#pager-next');
 		var first = $('#pager-first');
@@ -227,14 +233,15 @@ function loadComments() {
 			first = last;
 			last = tmp;
 		}
-		prev.attr('href', mw.util.getUrl(null, $.extend({}, query, {
-			offset: Math.max(query.offset - query.limit, 0)
-		}))).toggleClass('pager-disable', query.offset === 0);
-		next.attr('href', mw.util.getUrl(null, $.extend({}, query, {
-			offset: query.offset + query.limit
-		}))).toggleClass('pager-disable', !more);
-		first.toggleClass('pager-disable', query.offset === 0);
-		last.toggleClass('pager-disable', !more);
+		if ('offset' in query) delete query.offset;
+		prev.attr('href', mw.util.getUrl(null,
+			(hasprev ? $.extend({}, query, { from: res.pager.previd }) : query)
+		)).toggleClass('pager-disable', !hasprev);
+		next.attr('href', mw.util.getUrl(null,
+			(hasnext ? $.extend({}, query, { from: res.pager.nextid }) : query)
+		)).toggleClass('pager-disable', !hasnext);
+		first.toggleClass('pager-disable', !hasprev);
+		last.toggleClass('pager-disable', !hasnext);
 	});
 }
 

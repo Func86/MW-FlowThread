@@ -110,6 +110,8 @@ class SpecialManage extends \SpecialPage {
 	private function getFilterLinks($current) {
 		$links = array();
 		$query = $this->getQuery();
+		unset($query['from']);
+		unset($query['offset']);
 		foreach ($this->getPossibleFilters() as $filter) {
 			$msg = $this->msg("flowthread-filter-{$filter}")->escaped();
 			if ($filter === $current) {
@@ -128,7 +130,19 @@ class SpecialManage extends \SpecialPage {
 
 	private function getQuery() {
 		$query = $this->getRequest()->getQueryValues();
-		unset($query['title']);
+		$allowed = [
+			'filter' => true,
+			'page' => true,
+			'user' => true,
+			'keyword' => true,
+			'dir' => true,
+			'limit' => true,
+			'offset' => true,
+			'from' => true
+		];
+		foreach ($query as $key => $value) {
+			if (!$allowed[$key]) unset($query[$key]);
+		}
 		return $query;
 	}
 
@@ -136,7 +150,7 @@ class SpecialManage extends \SpecialPage {
 		$label = \Xml::inputLabel(
 			$this->msg('flowthreadmanage-user')->text(),
 			'user',
-			'',
+			'input-user',
 			15,
 			$user,
 			array('class' => 'mw-autocomplete-user') # This together with mediawiki.userSuggest will give us an auto completion
@@ -149,7 +163,7 @@ class SpecialManage extends \SpecialPage {
 		$label = \Xml::inputLabel(
 			$this->msg('flowthreadmanage-title')->text(),
 			'page',
-			'',
+			'input-page',
 			20,
 			$title
 		);
@@ -161,7 +175,7 @@ class SpecialManage extends \SpecialPage {
 		$label = \Xml::inputLabel(
 			$this->msg('flowthreadmanage-keyword')->text(),
 			'keyword',
-			'',
+			'input-keyword',
 			20,
 			$keyword
 		);
@@ -182,7 +196,8 @@ class SpecialManage extends \SpecialPage {
 	private function getFirstPageLink() {
 		$query = $this->getQuery();
 		unset($query['dir']);
-		$query['offset'] = 0;
+		unset($query['from']);
+		unset($query['offset']);
 		$msg = $this->msg('histlast')->escaped();
 		return $this->getQueryLink($msg, $query, 'pager-first');
 	}
@@ -190,7 +205,8 @@ class SpecialManage extends \SpecialPage {
 	private function getLastPageLink() {
 		$query = $this->getQuery();
 		$query['dir'] = 'prev';
-		$query['offset'] = 0;
+		unset($query['from']);
+		unset($query['offset']);
 		$msg = $this->msg('histfirst')->escaped();
 		return $this->getQueryLink($msg, $query, 'pager-last');
 	}

@@ -17,40 +17,47 @@ class Query {
 	public $limit = -1;
 	public $threadMode = true;
 	public $filter = self::FILTER_ALL;
+	public $continue = null;
+	public $internal = false;
 
 	// Query results
 	public $totalCount = 0;
 	public $posts = null;
+	public $pager = [];
 
 	public function fetch() {
 		$dbr = wfGetDB(DB_REPLICA);
+		$older = $this->dir === 'older';
 
-		$comments = array();
-		$parentLookup = array();
+		$comments = [];
+		$parentLookup = [];
+		$options = [
+			'ORDER BY' => 'flowthread_id ' . ($older ? 'DESC' : 'ASC')
+		];
 
-		$options = array(
-			'OFFSET' => $this->offset,
-			'ORDER BY' => 'flowthread_id ' . ($this->dir === 'older' ? 'DESC' : 'ASC'),
-		);
+		if (!$this->continue && $this->offset > 0) { // Disable offset when continue is used
+			$options['OFFSET'] = $this->internal ? $this->offset - 1 : $this->limit;
+		}
 		if ($this->limit !== -1) {
-			$options['LIMIT'] = $this->limit;
+			$options['LIMIT'] = $this->internal ? $this->limit + 1 : $this->limit;
 		}
 		if ($this->threadMode) {
 			$options[] = 'SQL_CALC_FOUND_ROWS';
 		}
 
 		$cond = [];
+		$expCond = []; // Expensive condiction should be put in the end
 		if ($this->pageid) {
 			$cond['flowthread_pageid'] = $this->pageid;
+		}
+		if ($this->threadMode) {
+			$cond[] = 'flowthread_parentid IS NULL';
 		}
 		if ($this->user) {
 			$cond['flowthread_username'] = $this->user;
 		}
 		if ($this->keyword) {
-			$cond[] = 'flowthread_text' . $dbr->buildLike($dbr->anyString(), $this->keyword, $dbr->anyString());
-		}
-		if ($this->threadMode) {
-			$cond[] = 'flowthread_parentid IS NULL';
+			$expCond[] = 'flowthread_text' . $dbr->buildLike($dbr->anyString(), $this->keyword, $dbr->anyString());
 		}
 
 		switch ($this->filter) {
@@ -73,12 +80,42 @@ class Query {
 			break;
 		}
 
+		// Query backward for pager prev-links
+		if ($this->internal && $this->continue) {
+			$res = $dbr->select('FlowThread', [ 'flowthread_id' ],
+			$cond + [
+				'flowthread_id' . ($older ? '>' : '<') . $dbr->addQuotes(UID::fromHex($this->continue)->getBin())
+			] + $expCond, __METHOD__, [
+				'ORDER BY' => 'flowthread_id ' . ($older ? 'DESC' : 'ASC'),
+				'LIMIT' => 1
+			]);
+			$row = $res->fetchObject();
+			if ($row) {
+				$this->pager['prev'] = true;
+				$this->pager['previd'] = UID::fromBin($row->flowthread_id)->getHex();
+			}
+		}
+
+		if ($this->continue) {
+			$cond[] = 'flowthread_id' . ($older ? '<=' : '>=') . $dbr->addQuotes(UID::fromHex($this->continue)->getBin());
+		}
+
 		// Get all root posts
 		$res = $dbr->select('FlowThread', Post::getRequiredColumns(),
-			$cond, __METHOD__, $options);
+			$cond + $expCond, __METHOD__, $options);
 
+		$count = 0;
 		$sqlPart = '';
 		foreach ($res as $row) {
+			if (!$count++ && $this->internal && $this->offset > 0) {
+				$this->pager['prev'] = true;
+				$this->pager['previd'] = UID::fromBin($row->flowthread_id)->getHex();
+				continue;
+			} elseif ($count > $this->limit) {
+				$this->pager['next'] = true;
+				$this->pager['nextid'] = UID::fromBin($row->flowthread_id)->getHex();
+				break;
+			}
 			$post = Post::newFromDatabaseRow($row);
 			$comments[] = $post;
 			$parentLookup[$post->id->getBin()] = $post;
