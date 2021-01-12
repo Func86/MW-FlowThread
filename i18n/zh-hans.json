@@ -119,7 +119,7 @@
 	"apihelp-query+allcomments-param-dir": "指明评论列举时使用何种方向排序。",
 	"apihelp-query+allcomments-param-limit": "列举评论的数量上限。",
 	"apihelp-query+allcomments-param-offset": "开始列举评论的偏移。",
-	"apihelp-query+allcomments-param-pager": '<span style="color: red;">内部参数。</span> 用于给评论管理页面生成指向前一页的链接。',
+	"apihelp-query+allcomments-param-pager": "<span style=\"color: red;\">内部参数。</span> 用于给评论管理页面生成指向前一页的链接。",
 
 	"sidebar-section-extension": "扩展程序",
 	"sidebar-usercomments": "用户评论",
