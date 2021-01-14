@@ -13,22 +13,22 @@ function createThread(post) {
 			thread.reply();
 		});
 
-	// Users with management privilege should have signed in.
-	thread.addButton('like', mw.msg('flowthread-ui-like') + '(' + post.like + ')', function() {
-		if (object.find('.comment-like').first().attr('liked') !== undefined) {
-			thread.dislike();
-		} else {
-			thread.like();
-		}
-	});
+		// Users with management privilege should have signed in.
+		thread.addButton('like', mw.msg('flowthread-ui-like') + '(' + post.like + ')', function() {
+			if (object.find('.comment-like').first().attr('liked') !== undefined) {
+				thread.dislike();
+			} else {
+				thread.like();
+			}
+		});
 
-	thread.addButton('report', mw.msg('flowthread-ui-report') + '(' + post.report + ')', function() {
-		if (object.find('.comment-report').first().attr('reported') !== undefined) {
-			thread.dislike();
-		} else {
-			thread.report();
-		}
-	});
+		thread.addButton('report', mw.msg('flowthread-ui-report') + '(' + post.report + ')', function() {
+			if (object.find('.comment-report').first().attr('reported') !== undefined) {
+				thread.dislike();
+			} else {
+				thread.report();
+			}
+		});
 
 		thread.addButton('delete', mw.msg('flowthread-ui-delete'), function() {
 			thread.delete();
