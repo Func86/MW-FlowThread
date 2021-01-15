@@ -208,7 +208,7 @@ class Post {
 		));
 	}
 
-	public function archiveChildren(DBConnRef $db, $archive = true) {
+	public function archiveChildren(\DBConnRef $db, $archive = true) {
 		$status_archived = self::STATUS_ARCHIVED;
 		$status_deleted = self::STATUS_DELETED;
 
