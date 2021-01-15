@@ -145,6 +145,19 @@ Thread.prototype.report = function() {
 	this.object.find('.comment-report').first().attr('reported', '');
 }
 
+function removeChildren(postid) {
+	if (!children[postid]) return;
+	var poped;
+	while (poped = children[postid].pop()) {
+		$('#comment-' + poped).remove();
+		removeChildren(poped);
+	}
+}
+
+Thread.prototype.removeChildren = function() {
+	removeChildren(this.post.id);
+};
+
 Thread.prototype.delete = function() {
 	// Implements a mechanism for delete confirmation
 	if (!this.deletionLock) {
@@ -165,6 +178,9 @@ Thread.prototype.delete = function() {
 			postid: this.post.id
 		});
 		this.deletionLock = false;
+		if (mw.config.get('wgCanonicalSpecialPageName') === 'FlowThreadManage') {
+			this.removeChildren();
+		}
 		this.object.remove();
 	}
 }
