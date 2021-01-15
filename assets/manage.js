@@ -1,12 +1,17 @@
 var filter;
 var deleted;
 var fulladmin = mw.config.exists('commentadmin');
+var children = new Object();
 
 function createThread(post) {
 	var thread = new Thread();
 	var object = thread.object;
 
 	thread.init(post);
+	if (post.parentid) {
+		if (!children[post.parentid]) children[post.parentid] = new Array();
+		children[post.parentid].push(post.id);
+	}
 
 	if (!deleted) {
 		thread.addButton('reply', mw.msg('flowthread-ui-reply'), function() {
@@ -71,6 +76,7 @@ Thread.prototype.recover = function() {
 		type: 'recover',
 		postid: this.post.id
 	});
+	this.removeChildren();
 	this.object.remove();
 };
 
@@ -82,6 +88,7 @@ Thread.prototype.markchecked = function() {
 		postid: this.post.id
 	});
 	if (filter === 'reported') {
+		this.removeChildren();
 		this.object.remove();
 	} else {
 		this.object.find('.comment-markchecked').remove();
@@ -96,6 +103,7 @@ Thread.prototype.erase = function() {
 		type: 'erase',
 		postid: this.post.id
 	});
+	this.removeChildren();
 	this.object.remove();
 };
 
@@ -111,6 +119,13 @@ Thread.join = function(threads) {
 	}).join('|');
 };
 
+Thread.removeWithChildren = function(threads) {
+	threads.forEach(function(t) {
+		t.removeChildren();
+		t.object.remove();
+	})
+};
+
 Thread.delete = function(threads) {
 	var api = new mw.Api();
 	api.post({
@@ -118,7 +133,7 @@ Thread.delete = function(threads) {
 		type: 'delete',
 		postid: Thread.join(threads)
 	});
-	Thread.remove(threads);
+	Thread.removeWithChildren(threads);
 };
 
 Thread.recover = function(threads) {
@@ -138,7 +153,7 @@ Thread.erase = function(threads) {
 		type: 'erase',
 		postid: Thread.join(threads)
 	});
-	Thread.remove(threads);
+	Thread.removeWithChildren(threads);
 };
 
 Thread.markchecked = function(threads) {
