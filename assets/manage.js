@@ -76,7 +76,6 @@ Thread.prototype.recover = function() {
 		type: 'recover',
 		postid: this.post.id
 	});
-	this.removeChildren();
 	this.object.remove();
 };
 
@@ -117,6 +116,19 @@ Thread.join = function(threads) {
 	return threads.map(function(t) {
 		return t.post.id;
 	}).join('|');
+};
+
+function removeChildren(postid) {
+	if (!children[postid]) return;
+	var poped;
+	while (poped = children[postid].pop()) {
+		$('#comment-' + poped).remove();
+		removeChildren(poped);
+	}
+}
+
+Thread.prototype.removeChildren = function() {
+	removeChildren(this.post.id);
 };
 
 Thread.removeWithChildren = function(threads) {
