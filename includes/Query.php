@@ -82,15 +82,11 @@ class Query {
 
 		// Query backward for pager prev-links
 		if ($this->internal && $this->continue) {
-			$res = $dbr->select('FlowThread', [ 'flowthread_id' ],
-			$cond + [
-				'flowthread_id' . ($older ? '>' : '<') . $dbr->addQuotes(UID::fromHex($this->continue)->getBin())
-			] + $expCond, __METHOD__, [
-				'ORDER BY' => 'flowthread_id ' . ($older ? 'DESC' : 'ASC'),
-				'LIMIT' => 1
-			]);
-			$row = $res->fetchObject();
-			if ($row) {
+			$row = $dbr->selectRow('FlowThread', [ 'flowthread_id' ],
+				$cond + [
+					'flowthread_id' . ($older ? '>' : '<') . $dbr->addQuotes(UID::fromHex($this->continue)->getBin())
+				] + $expCond);
+			if ($row !== false) {
 				$this->pager['prev'] = true;
 				$this->pager['previd'] = UID::fromBin($row->flowthread_id)->getHex();
 			}
