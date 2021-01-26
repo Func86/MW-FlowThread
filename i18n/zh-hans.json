@@ -66,6 +66,10 @@
 	"flowthread-ui-useroptout": "应用户要求，评论已经被关闭。请前往用户讨论页以留言。",
 	"flowthread-ui-disabled": "该页面的评论已经被关闭。",
 
+	"flowthread-error-movetoinvalid": "您试图移动含有评论的页面至不允许评论的名字空间。由于您的操作可能有问题，系统自动阻止了该操作。如果确实有需要，请联系具有评论管理权限的用户协助移动。",
+	"flowthread-error-movetouser": "您试图移动存在评论控制的页面至用户名字空间。由于您的操作可能有问题，系统自动阻止了该操作。如果确实有需要，请联系具有评论管理权限的用户协助移动。",
+	"flowthread-error-pageredirect": "您试图将含有评论的页面改为重定向。由于您的操作可能有问题，系统自动阻止了该操作。如果确实有需要，请联系具有评论管理权限的用户协助。",
+
 	"echo-category-title-flowthread": "FlowThread评论",
 	"echo-pref-tooltip-flowthread": "当我的评论被回复时提醒我。",
 

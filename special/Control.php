@@ -50,7 +50,7 @@ class SpecialControl extends \FormSpecialPage {
 
 		$isAdmin = $this->getUser()->isAllowed('commentadmin');
 		$this->isAdmin = $isAdmin;
-		$ownsPage = Post::userOwnsPage($this->getUser(), $title);
+		$ownsPage = Helper::userOwnsPage($this->getUser(), $title);
 		$this->ownsPage = $ownsPage;
 
 		// Access granted only if: is comment admin, or the user owns the page and the page is not disabled

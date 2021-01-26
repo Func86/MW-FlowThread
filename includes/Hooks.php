@@ -1,6 +1,8 @@
 <?php
 namespace FlowThread;
 
+use MediaWiki\MediaWikiServices;
+
 class Hooks {
 
 	public static function onBeforePageDisplay(\OutputPage &$output, \Skin &$skin) {
@@ -70,35 +72,30 @@ class Hooks {
 		return true;
 	}
 
-	public static function onArticleDeleteComplete(&$article, \User &$user, $reason, $id, $content, \LogEntry $logEntry, $archivedRevisionCount) {
+	private static function archiveInpage($pageid, $archive = true) {
 		$status_archived = Post::STATUS_ARCHIVED;
+		$status_deleted = Post::STATUS_DELETED;
 		$dbw = wfGetDB(DB_MASTER);
-		$dbw->update('FlowThread', [
-				"flowthread_status=flowthread_status|{$status_archived}"
-			], [
-				'flowthread_pageid' => $id,
-				"NOT flowthread_status&{$status_archived}" // As deleted comments' children have this status
-			]
-		);
-		return true;
-	}
 
-	public static function onArticleUndelete(\Title $title, $create, $comment, $oldPageId, $restoredPages) {
-		if ($create) {
-			$status_archived = Post::STATUS_ARCHIVED;
-			$status_deleted = Post::STATUS_DELETED;
-			$dbw = wfGetDB(DB_MASTER);
-
+		if ($archive) {
+			$dbw->update('FlowThread', [
+					"flowthread_status=flowthread_status|{$status_archived}"
+				], [
+					'flowthread_pageid' => $id,
+					"NOT flowthread_status&{$status_archived}" // As deleted comments' children have this status
+				]
+			);
+		} else {
 			$dbw->update('FlowThread', [
 					"flowthread_status=flowthread_status^{$status_archived}"
 				], [
-					'flowthread_pageid' => $oldPageId,
+					'flowthread_pageid' => $pageid,
 					'flowthread_parentid' => null
 				]
 			);
 
 			$res = $dbw->select('FlowThread', Post::getRequiredColumns(), [
-					'flowthread_pageid' => $oldPageId,
+					'flowthread_pageid' => $pageid,
 					'flowthread_parentid' => null,
 					"NOT flowthread_status&{$status_deleted}" // As deleted comments' children have this status
 				]
@@ -106,10 +103,87 @@ class Hooks {
 
 			foreach ($res as $row) {
 				$post = Post::newFromDatabaseRow($row);
-				$count += $post->archiveChildren($dbw, false);
+				$post->archiveChildren($dbw, false);
 			}
 		}
+	}
+
+	public static function onArticleDeleteComplete(\WikiPage $wikiPage, \User $user, $reason, $id, \Content $content, \LogEntry $logEntry, $archivedRevisionCount) {
+		self::archiveInpage($id);
+		SpecialControl::setControlStatus($wikiPage->getTitle(), SpecialControl::STATUS_ENABLED);
+
 		return true;
+	}
+
+	public static function onArticleUndelete(\Title $title, $create, $comment, $oldPageId, $restoredPages) {
+		if ($create) {
+			self::archiveInpage($oldPageId, false);
+		}
+		return true;
+	}
+
+	private static function checkHavePost($pageid) {
+		$dbr = wfGetDB(DB_REPLICA);
+		$res = $dbr->selectRow('FlowThread', Post::getRequiredColumns(), [
+			'flowthread_pageid' => $pageid
+		]);
+		return $res !== false;
+	}
+
+	public static function onMovePageCheckPermissions( \Title $oldTitle, \Title $newTitle, \User $user, $reason, \Status $status ) {
+		if (!Helper::canEverPostOnTitle($oldTitle)) return true;
+
+		if ($user->isAllowed('commentadmin-restricted')) return true;
+
+		if ($oldTitle->getNamespace() !== NS_USER && $newTitle->getNamespace() === NS_USER &&
+			SpecialControl::getControlStatus($oldTitle) !== SpecialControl::STATUS_ENABLED
+		) {
+			$status->fatal('flowthread-error-movetouser');
+			return false;
+		}
+
+		if (Helper::isAllowedTitle($newTitle)) return true;
+		
+
+		if (self::checkHavePost($oldTitle->getArticleID())) {
+			$status->fatal('flowthread-error-movetoinvalid');
+			return false;
+		}
+	}
+
+	public static function onPageMoveComplete( \Title $oldTitle, \Title $newTitle, \User $user, $reason, \Status $status ) {
+		if (!Helper::canEverPostOnTitle($oldTitle)) {
+			if (Helper::canEverPostOnTitle($newTitle)) {
+				self::archiveInpage($newTitle->getArticleID(), false);
+			}
+			return true;
+		}
+
+		if (!Helper::canEverPostOnTitle($newTitle)) {
+			self::archiveInpage($newTitle->getArticleID());
+		} elseif ($oldTitle->getNamespace() === NS_USER && $newTitle->getNamespace() !== NS_USER) {
+			SpecialControl::setControlStatus($newTitle, SpecialControl::STATUS_ENABLED);
+		}
+	}
+
+	public static function onEditFilterMergedContent(\IContextSource $context, \Content $content, \Status $status, $summary, \User $user, $minoredit) {
+		if ($user->isAllowed('commentadmin-restricted')) return true;
+
+		$alias = MediaWikiServices::getInstance()->getMagicWordFactory()->newArray([ 'redirect' ]);
+		$text = $content->getText();
+		$regexes = $alias->getRegexStart();
+		$is_Redirect = false;
+		foreach ($regexes as $regex) {
+			if (preg_match($regex, $text)) {
+				$is_Redirect = true;
+				break;
+			}
+		}
+		if ($is_Redirect && self::checkHavePost($context->getTitle()->getArticleID())) {
+			$status->fatal('flowthread-error-pageredirect');
+			$status->value = MediaWiki\EditPage\IEditObject::AS_HOOK_ERROR_EXPECTED;
+			return false;
+		}
 	}
 
 	public static function onRenameUserComplete( $uid, $oldName, $newName ) {
@@ -154,7 +228,7 @@ class Hooks {
 		$user = $skinTemplate->getRelevantUser();
 
 		$title = $skinTemplate->getRelevantTitle();
-		if (Helper::canEverPostOnTitle($title) && ($commentAdmin || Post::userOwnsPage($skinTemplate->getUser(), $title))) {
+		if (Helper::canEverPostOnTitle($title) && ($commentAdmin || Helper::userOwnsPage($skinTemplate->getUser(), $title))) {
 			// add a new action
 			$links['actions']['flowthreadcontrol'] = [
 				'id' => 'ca-flowthreadcontrol',
