@@ -126,7 +126,7 @@ class SpamFilter {
 	private static function getBlackList() {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		return $cache->getWithSetCallback(
-			wfMemcKey('flowthread', 'spamblacklist'),
+			$cache->makeKey('flowthread', 'spamblacklist'),
 			60,
 			function () {
 				$source = wfMessage('flowthread-blacklist')->inContentLanguage();
