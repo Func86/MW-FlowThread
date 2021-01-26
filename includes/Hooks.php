@@ -197,7 +197,10 @@ class Hooks {
 	}
 
 	public static function onMergeAccountFields( &$updateFields ) {
-		$updateFields[] = [ 'FlowThread', 'flowthread_userid', 'flowthread_username' ];
+		$updateFields[] = [
+			[ 'FlowThread', 'flowthread_userid', 'flowthread_username' ],
+			[ 'FlowThreadAttitude', 'flowthread_att_userid' ],
+		];
 		return true;
 	}
 
