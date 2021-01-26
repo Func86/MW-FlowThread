@@ -131,23 +131,6 @@ class Post {
 		}
 	}
 
-	/**
-	 * Check if the a page is one's user page or user subpage
-	 *
-	 * @param User $user
-	 *   User who is acting the action
-	 * @param Title $title
-	 *   Page on which the action is acting
-	 * @return
-	 *   True if the page belongs to the user
-	 */
-	public static function userOwnsPage(\User $user, \Title $title) {
-		if ($title->getNamespace() === NS_USER && $title->getRootText() === $user->getName()) {
-			return true;
-		}
-		return false;
-	}
-
 	public static function canPost(\User $user) {
 		/* Disallow blocked user to post */
 		if ($user->isBlocked()) {
@@ -291,7 +274,7 @@ class Post {
 		// Poster himself can delete as well
 		if ($user->getId() === 0 || $user->getId() !== $this->userid) {
 			if (!self::canPerformAdmin($user) &&
-				!self::userOwnsPage($user, \Title::newFromId($this->pageid))) {
+				!Helper::userOwnsPage($user, \Title::newFromId($this->pageid))) {
 				self::diePermission();
 			}
 		}

@@ -66,6 +66,10 @@
 	"flowthread-ui-useroptout": "Comments are disabled upon user request. Please go to discussion page instead.",
 	"flowthread-ui-disabled": "Comments are disabled on this page.",
 
+	"flowthread-error-movetoinvalid": "You try to move page with comment(s) to namespace which dont't allow FlowThread comment. Your action seems problematic, the system prevent it automaticly. If you realy need to do this, please ask user with comment manage rights for help.",
+	"flowthread-error-movetouser": "You try to move page with comment control to user namespace. Your action seems problematic, the system prevent it automaticly. If you realy need to do this, please ask user with comment manage rights for help.",
+	"flowthread-error-pageredirect": "You try to edit page with comment(s) as redirect. Your action seems problematic, the system prevent it automaticly. If you realy need to do this, please ask user with comment manage rights for help.",
+
 	"echo-category-title-flowthread": "FlowThread comment",
 	"echo-pref-tooltip-flowthread": "Notify me when my comment is replyed.",
 

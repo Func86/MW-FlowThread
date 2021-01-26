@@ -47,6 +47,15 @@
 		"ArticleUndelete": [
 			"FlowThread\\Hooks::onArticleUndelete"
 		],
+		"MovePageCheckPermissions": [
+			"FlowThread\\Hooks::onMovePageCheckPermissions"
+		],
+		"PageMoveComplete": [
+			"FlowThread\\Hooks::onPageMoveComplete"
+		],
+		"EditFilterMergedContent": [
+			"FlowThread\\Hooks::onEditFilterMergedContent"
+		],
 		"RenameUserComplete": [
 			"FlowThread\\Hooks::onRenameUserComplete"
 		],

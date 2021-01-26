@@ -151,12 +151,7 @@ class Helper {
 		);
 	}
 
-	public static function canEverPostOnTitle(\Title $title) {
-		// Disallow commenting on pages without article id
-		if ($title->getArticleID() == 0) {
-			return false;
-		}
-
+	public static function isAllowedTitle(\Title $title) {
 		if ($title->isSpecialPage()) {
 			return false;
 		}
@@ -181,6 +176,15 @@ class Helper {
 		}
 
 		return true;
+	}
+
+	public static function canEverPostOnTitle(\Title $title) {
+		// Disallow commenting on pages without article id
+		if ($title->getArticleID() == 0) {
+			return false;
+		}
+
+		return self::isAllowedTitle($title);
 	}
 
 	public static function convertPosts(array $posts, \User $user, $needTitle = false, $priviledged = false) {
@@ -209,5 +213,22 @@ class Helper {
 			$ret[] = $json;
 		}
 		return $ret;
+	}
+
+	/**
+	 * Check if the a page is one's user page or user subpage
+	 *
+	 * @param User $user
+	 *   User who is acting the action
+	 * @param Title $title
+	 *   Page on which the action is acting
+	 * @return
+	 *   True if the page belongs to the user
+	 */
+	public static function userOwnsPage(\User $user, \Title $title) {
+		if ($title->getNamespace() === NS_USER && $title->getRootText() === $user->getName()) {
+			return true;
+		}
+		return false;
 	}
 }
