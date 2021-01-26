@@ -7,14 +7,6 @@ class SpecialImport extends \FormSpecialPage {
 		parent::__construct('FlowThreadImport', 'commentadmin');
 	}
 
-	public function execute($par) {
-		$user = $this->getUser();
-		if (!$this->userCanExecute($user)) {
-			throw new \PermissionsError('commentadmin');
-		}
-		parent::execute($par);
-	}
-
 	public function onSubmit(array $data, \HTMLForm $form = null) {
 		// Get uploaded file
 		$upload = &$_FILES['wpjsonimport'];
