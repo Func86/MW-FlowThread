@@ -16,7 +16,8 @@ class Query {
 	public $offset = 0;
 	public $limit = -1;
 	public $threadMode = true;
-	public $filter = self::FILTER_ALL;
+	private $filter = self::FILTER_ALL;
+
 	public $continue = null;
 	public $internal = false;
 
@@ -24,6 +25,24 @@ class Query {
 	public $totalCount = 0;
 	public $posts = null;
 	public $pager = [];
+
+	public function setFilter($filter) {
+		$oldFilter = $this->filter;
+		switch ($filter) {
+		case self::FILTER_ALL:
+		case self::FILTER_NORMAL:
+		case self::FILTER_REPORTED:
+		case self::FILTER_DELETED:
+		case self::FILTER_SPAM:
+			$this->filter = $filter;
+			return $oldFilter;
+		}
+		return null;
+	}
+
+	public function getFilter($filter) {
+		return $this->filter;
+	}
 
 	public function fetch() {
 		$dbr = wfGetDB(DB_REPLICA);

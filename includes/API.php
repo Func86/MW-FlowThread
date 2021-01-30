@@ -54,7 +54,7 @@ class API extends \ApiBase {
 
 		$page = new Query();
 		$page->pageid = $pageid;
-		$page->filter = Query::FILTER_NORMAL;
+		$page->setFilter(Query::FILTER_NORMAL);
 		$page->offset = $offset;
 		$page->limit = $limit;
 		$page->fetch();
@@ -102,19 +102,20 @@ class API extends \ApiBase {
 		$query = new Query();
 		$query->threadMode = false;
 
+		$filterMap = [
+			'all' => Query::FILTER_ALL,
+			'normal' => Query::FILTER_NORMAL,
+			'deleted' => Query::FILTER_DELETED,
+			'spam' => Query::FILTER_SPAM,
+			'reported' => Query::FILTER_REPORTED
+		];
 		$filter = $this->getMain()->getVal('filter');
 		$priviledged = true;
-		if ($filter === 'all') {
-			$query->filter = Query::FILTER_ALL;
-		} else if ($filter === 'deleted') {
-			$query->filter = Query::FILTER_DELETED;
-		} else if ($filter === 'spam') {
-			$query->filter = Query::FILTER_SPAM;
-		} else if ($filter === 'reported') {
-			$query->filter = Query::FILTER_REPORTED;
+		if (isset($filter) && isset($filterMap[$filter])) {
+			$query->setFilter($filterMap[$filter]);
 		} else {
 			$priviledged = false;
-			$query->filter = Query::FILTER_NORMAL;
+			$query->setFilter(Query::FILTER_NORMAL);
 		}
 
 		// Try pageid first, if it is absent/invalid, also try title.
