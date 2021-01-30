@@ -205,6 +205,7 @@ class Post {
 			]
 		);
 		$count = $db->affectedRows();
+		if (!$count) return 0;
 
 		$res = $db->select('FlowThread', self::getRequiredColumns(),
 			[

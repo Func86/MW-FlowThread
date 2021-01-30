@@ -171,7 +171,7 @@ class Helper {
 		}
 
 		// Namespace whitelist
-		if (!in_array($title->getNamespace(), self::getAllowedNamespace())) {
+		if (!$title->inNamespaces(self::getAllowedNamespace())) {
 			return false;
 		}
 
@@ -226,7 +226,7 @@ class Helper {
 	 *   True if the page belongs to the user
 	 */
 	public static function userOwnsPage(\User $user, \Title $title) {
-		if ($title->getNamespace() === NS_USER && $title->getRootText() === $user->getName()) {
+		if ($title->inNamespace(NS_USER) && $title->getRootText() === $user->getName()) {
 			return true;
 		}
 		return false;
