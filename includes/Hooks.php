@@ -82,10 +82,17 @@ class Hooks {
 					"flowthread_status=flowthread_status|{$status_archived}"
 				], [
 					'flowthread_pageid' => $id,
-					"NOT flowthread_status&{$status_archived}" // As deleted comments' children have this status
+					"NOT flowthread_status&{$status_archived}" // The archived status of deleted comments' children should not be changed
 				]
 			);
 		} else {
+			$res = $dbw->select('FlowThread', Post::getRequiredColumns(), [
+					'flowthread_pageid' => $pageid,
+					'flowthread_parentid' => null,
+					"NOT flowthread_status&{$status_deleted}" // The archived status of deleted comments' children should not be changed
+				]
+			);
+
 			$dbw->update('FlowThread', [
 					"flowthread_status=flowthread_status^{$status_archived}"
 				], [
@@ -94,16 +101,11 @@ class Hooks {
 				]
 			);
 
-			$res = $dbw->select('FlowThread', Post::getRequiredColumns(), [
-					'flowthread_pageid' => $pageid,
-					'flowthread_parentid' => null,
-					"NOT flowthread_status&{$status_deleted}" // As deleted comments' children have this status
-				]
-			);
-
 			foreach ($res as $row) {
 				$post = Post::newFromDatabaseRow($row);
-				$post->archiveChildren($dbw, false);
+				if (!!($post->status & $status_archived) !== $archive) {
+					$post->archiveChildren($dbw, $archive);
+				}
 			}
 		}
 	}
@@ -118,13 +120,29 @@ class Hooks {
 	public static function onArticleUndelete(\Title $title, $create, $comment, $oldPageId, $restoredPages) {
 		if ($create) {
 			self::archiveInpage($oldPageId, false);
+			return true;
 		}
+		$dbw = wfGetDB(DB_MASTER);
+		$hit = false;
+		foreach ($restoredPages as $pageid => $true) {
+			$res = $dbw->selectRow('archive', 'ar_title', [ 'ar_page_id' => $pageid ]);
+			if ($res === false) {
+				$dbw->update('FlowThread', [
+						'flowthread_pageid' => $oldPageId
+					], [
+						'flowthread_pageid' => $pageid
+					]
+				);
+				$hit = true;
+			}
+		}
+		if ($hit) self::archiveInpage($oldPageId, false);
 		return true;
 	}
 
 	private static function checkHavePost($pageid) {
 		$dbr = wfGetDB(DB_REPLICA);
-		$res = $dbr->selectRow('FlowThread', Post::getRequiredColumns(), [
+		$res = $dbr->selectRow('FlowThread', 'flowthread_id', [
 			'flowthread_pageid' => $pageid
 		]);
 		return $res !== false;
@@ -151,17 +169,17 @@ class Hooks {
 		}
 	}
 
-	public static function onPageMoveComplete( \Title $oldTitle, \Title $newTitle, \User $user, $reason, \Status $status ) {
+	public static function onTitleMoveComplete( \Title &$oldTitle, \Title &$newTitle, \User &$user, $oldid, $newid, $reason, \Revision $revision )
 		if (!Helper::canEverPostOnTitle($oldTitle)) {
 			if (Helper::canEverPostOnTitle($newTitle)) {
-				self::archiveInpage($newTitle->getArticleID(), false);
+				self::archiveInpage($oldid, false);
 			}
 			return true;
 		}
 
 		if (!Helper::canEverPostOnTitle($newTitle)) {
-			self::archiveInpage($newTitle->getArticleID());
-		} elseif ($oldTitle->getNamespace() === NS_USER && $newTitle->getNamespace() !== NS_USER) {
+			self::archiveInpage($oldid);
+		} elseif ($oldTitle->inNamespace(NS_USER) && !$newTitle->inNamespace(NS_USER)) {
 			SpecialControl::setControlStatus($newTitle, SpecialControl::STATUS_ENABLED);
 		}
 	}
