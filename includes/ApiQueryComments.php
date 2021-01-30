@@ -10,7 +10,7 @@ class ApiQueryComments extends \ApiQueryBase {
 	private function fetchPosts($pageid, $user, $limit = 10, $offset = 0) {
 		$page = new Query();
 		$page->pageid = $pageid;
-		$page->filter = Query::FILTER_NORMAL;
+		$page->setFilter(Query::FILTER_NORMAL);
 		$page->offset = $offset;
 		$page->limit = $limit;
 		$page->fetch();

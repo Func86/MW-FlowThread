@@ -21,18 +21,19 @@ class ApiQueryAllComments extends \ApiQueryBase {
 			$query->continue = $cont[0];
 		}
 
+		$filterMap = [
+			'all' => Query::FILTER_ALL,
+			'normal' => Query::FILTER_NORMAL,
+			'deleted' => Query::FILTER_DELETED,
+			'spam' => Query::FILTER_SPAM,
+			'reported' => Query::FILTER_REPORTED
+		];
 		$filter = $params['filter'];
-		if ($filter === 'all') {
-			$query->filter = Query::FILTER_ALL;
-		} else if ($filter === 'deleted') {
-			$query->filter = Query::FILTER_DELETED;
-		} else if ($filter === 'spam') {
-			$query->filter = Query::FILTER_SPAM;
-		} else if ($filter === 'reported') {
-			$query->filter = Query::FILTER_REPORTED;
+		if (isset($filter) && isset($filterMap[$filter])) {
+			$query->setFilter($filterMap[$filter]);
 		} else {
 			$priviledged = false;
-			$query->filter = Query::FILTER_NORMAL;
+			$query->setFilter(Query::FILTER_NORMAL);
 		}
 
 		// Try pageid first, if it is absent/invalid, also try title.
