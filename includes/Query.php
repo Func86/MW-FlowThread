@@ -143,7 +143,7 @@ class Query {
 		}
 
 		if ($this->threadMode) {
-			$this->totalCount = intval($dbr->query('select FOUND_ROWS() as row')->fetchObject()->row);
+			$this->totalCount = intval($dbr->query('select FOUND_ROWS() as count')->fetchObject()->count);
 
 			// Recursively get all children post list
 			// This is not really resource consuming as you might think, as we use IN to boost it up
