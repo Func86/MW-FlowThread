@@ -81,7 +81,7 @@ class Hooks {
 			$dbw->update('FlowThread', [
 					"flowthread_status=flowthread_status|{$status_archived}"
 				], [
-					'flowthread_pageid' => $id,
+					'flowthread_pageid' => $pageid,
 					"NOT flowthread_status&{$status_archived}" // The archived status of deleted comments' children should not be changed
 				]
 			);
@@ -122,13 +122,14 @@ class Hooks {
 			self::archiveInpage($oldPageId, false);
 			return true;
 		}
+		$dstPageId = $title->getArticleID();
 		$dbw = wfGetDB(DB_MASTER);
 		$hit = false;
 		foreach ($restoredPages as $pageid => $true) {
 			$res = $dbw->selectRow('archive', 'ar_title', [ 'ar_page_id' => $pageid ]);
 			if ($res === false) {
 				$dbw->update('FlowThread', [
-						'flowthread_pageid' => $oldPageId
+						'flowthread_pageid' => $dstPageId
 					], [
 						'flowthread_pageid' => $pageid
 					]
@@ -136,7 +137,7 @@ class Hooks {
 				$hit = true;
 			}
 		}
-		if ($hit) self::archiveInpage($oldPageId, false);
+		if ($hit) self::archiveInpage($dstPageId, false);
 		return true;
 	}
 
