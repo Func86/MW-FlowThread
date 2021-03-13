@@ -27,7 +27,6 @@
 		"FlowThread\\Helper": "includes/Helper.php",
 		"FlowThread\\SpecialExport": "special/Export.php",
 		"FlowThread\\SpecialImport": "special/Import.php",
-		"FlowThread\\SpecialManage": "special/Manage.php",
 		"FlowThread\\SpecialLink": "special/Link.php",
 		"FlowThread\\SpecialControl": "special/Control.php",
 		"FlowThread\\SpecialMerge": "special/Merge.php",
@@ -203,7 +202,6 @@
 		"comments/erase": "LogFormatter",
 		"comments/import": "LogFormatter",
 		"comments/markchecked": "LogFormatter",
-		"comments/merge": "LogFormatter",
 		"comments/disable": "LogFormatter",
 		"comments/enable": "LogFormatter"
 	},
@@ -212,8 +210,7 @@
 		"FlowThreadImport": "FlowThread\\SpecialImport",
 		"FlowThreadManage": "FlowThread\\SpecialManage",
 		"FlowThreadLink": "FlowThread\\SpecialLink",
-		"FlowThreadControl": "FlowThread\\SpecialControl",
-		"FlowThreadMerge": "FlowThread\\SpecialMerge"
+		"FlowThreadControl": "FlowThread\\SpecialControl"
 	},
 	"config": {
 		"FlowThreadConfig": {
