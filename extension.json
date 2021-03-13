@@ -27,9 +27,9 @@
 		"FlowThread\\Helper": "includes/Helper.php",
 		"FlowThread\\SpecialExport": "special/Export.php",
 		"FlowThread\\SpecialImport": "special/Import.php",
+		"FlowThread\\SpecialManage": "special/Manage.php",
 		"FlowThread\\SpecialLink": "special/Link.php",
 		"FlowThread\\SpecialControl": "special/Control.php",
-		"FlowThread\\SpecialMerge": "special/Merge.php",
 		"FlowThread\\EchoHooks": "echo/Hooks.php",
 		"FlowThread\\EchoPresentationModel": "echo/PresentationModel.php",
 		"FlowThread\\EchoAlertPresentationModel": "echo/AlertPresentationModel.php"
