@@ -1,4 +1,6 @@
 var config = mw.config.get('wgFlowThreadConfig');
+config.Avatar = config.Avatar.replace(/\$\{SERVER\}/g, mw.config.get('wgServer'));
+config.AnonymousAvatar = config.AnonymousAvatar.replace(/\$\{SERVER\}/g, mw.config.get('wgServer'));
 var replyBox = null;
 
 /* Get avatar by user name */
