@@ -1,9 +1,9 @@
 {
 	"name": "FlowThread",
-	"author": "Gary Guo and others",
-	"url": "https://github.com/nbdd0121/MW-FlowThread",
+	"author": "[https://github.com/nbdd0121 Gary Guo], [http://zh.moegirl.org.cn/User:Func Func] and others",
+	"url": "https://github.com/Funcer8/MW-FlowThread",
 	"descriptionmsg": "flowthread_desc",
-	"version": "1.3.2",
+	"version": "1.4.0",
 	"license-name": "BSD-2-Clause",
 	"type": "specialpage",
 	"ExtensionMessagesFiles": {
