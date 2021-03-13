@@ -214,8 +214,8 @@
 	},
 	"config": {
 		"FlowThreadConfig": {
-			"Avatar": "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y",
-			"AnonymousAvatar": "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y",
+			"Avatar": "${SERVER}/resources/assets/mediawiki.png",
+			"AnonymousAvatar": "${SERVER}/resources/assets/mediawiki.png",
 			"PopularPostCount": 3,
 			"PopularPostThreshold": 1,
 			"MaxNestLevel": 3
