@@ -369,6 +369,10 @@ class API extends \ApiBase {
 					'unwrap' => true // Return text without a wrapper div
 				]);
 
+				if ($useWikitext && $filterResult['good']) {
+					$filterResult['good'] = SpamFilter::validateOutput($output, $user);
+				}
+
 				// Get all mentioned user
 				$mentioned = Helper::generateMentionedList($output, $postObject);
 

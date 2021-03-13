@@ -72,6 +72,9 @@ class SpamFilter {
 			$value = isset($exploded[1]) ? $exploded[1] : '';
 
 			switch ($key) {
+			case 'template':
+				$options['template'] = true;
+				break;
 			case 'replace':
 				// Replace the text instead of marking as spam
 				$options['replace'] = $value;
@@ -94,6 +97,8 @@ class SpamFilter {
 				}
 			}
 		}
+		if ($options['template']) $options['rule'] = 'template';
+		else $options['rule'] = 'normal';
 		return $options;
 	}
 
@@ -101,24 +106,23 @@ class SpamFilter {
 	 * Parse whole spam blacklist
 	 */
 	private static function parseLines($lines) {
-		$batches = array();
+		$count = 0;
+		$index = [], $list = [];
 		foreach ($lines as $line) {
 			$parsed = self::parseLine($line);
 			if ($parsed) {
-				if (isset($batches[$parsed['opt']])) {
-					// Concatenate regexes to speed up
-					$batches[$parsed['opt']] .= '|' . $parsed['regex'];
-				} else {
-					$batches[$parsed['opt']] = $parsed['regex'];
+				$opt = $parsed['opt'];
+				if (!isset($index[$opt])) {
+					$index[$opt] = $count++;
+					$list[$index[$opt]][0] = [];
+					$list[$index[$opt]][1] = self::parseOptions($opt);
 				}
+				// Concatenate regexes to speed up
+				$list[$index[$opt]][1][] = $parsed['regex'];
 			}
 		}
-		$ret = array();
-		foreach ($batches as $opt => $regex) {
-			$ret[] = array(
-				'/' . $regex . '/iu',
-				self::parseOptions($opt),
-			);
+		foreach ($list as $idx => &$item) {
+			$item[0] = implode('|', $item[0]);
 		}
 		return $ret;
 	}
@@ -139,6 +143,25 @@ class SpamFilter {
 		);
 	}
 
+	public static function isAllowedUser($poster, $group, $right) {
+		if (isset($group)) {
+			// When user is in the allowed group list, we skip this rule
+			if (count(array_intersect($group, $poster->getGroups()))) {
+				return true;
+			}
+		}
+
+		if (isset($right)) {
+			// Right-based control
+			foreach ($right as $item) {
+				if ($poster->isAllowed($item)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static function validate($text, $poster, $wikitext) {
 		$blacklist = self::getBlackList();
 		$ret = array(
@@ -147,22 +170,10 @@ class SpamFilter {
 
 		foreach ($blacklist as $line) {
 			list($regex, $opt) = $line;
+			if ($opt['rule'] !== 'normal') continue;
+			$regex = '/' . $regex . '/iu';
 			if (preg_match($regex, $text)) {
-				if (isset($opt['group'])) {
-					// When user is in the allowed group list, we skip this rule
-					if (count(array_intersect($opt['group'], $poster->getGroups()))) {
-						continue;
-					}
-				}
-
-				if (isset($opt['right'])) {
-					// Right-based control
-					foreach ($opt['right'] as $item) {
-						if ($poster->isAllowed($item)) {
-							continue 2;
-						}
-					}
-				}
+				if (self::isAllowedUser($poster, $opt['group'], $opt['right'])) continue;
 
 				if (isset($opt['replace'])) {
 					$replaceText = $opt['replace'];
@@ -182,6 +193,32 @@ class SpamFilter {
 
 		$ret['text'] = $text;
 		return $ret;
+	}
+
+	public static function validateOutput($output, $poster) {
+		$blacklist = self::getBlackList();
+		if (!isset($blacklist[0])) return true;
+
+		$alltemplate = [];
+		$templates = $output->getTemplates();
+		foreach ($templates as $group) {
+			foreach ($group as $page_name => $page_id) {
+				$alltemplate[] = $page_name;
+			}
+		}
+		$alltemplate = implode('|', $alltemplate);
+
+		foreach ($blacklist as $line) {
+			list($regex, $opt) = $line;
+			if ($opt['rule'] !== 'template') continue;
+			// Build regex to match concatenated templates for speed
+			$regex = '/(?:.*\|)*(' . $regex . ')(?:\|.*)*/iu';
+			if (preg_match($regex, $alltemplate)) {
+				if (self::isAllowedUser($poster, $opt['group'], $opt['right'])) continue;
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static function sanitize($html) {
