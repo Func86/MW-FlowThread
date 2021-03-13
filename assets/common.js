@@ -196,7 +196,9 @@ function createReplyBox(thread) {
 			content: text,
 			wikitext: replyBox.isInWikitextMode(),
 		};
-		api.post(req).done(reloadComments).fail(function(error, obj) {
+		api.post(req).done(function () {
+			reloadComments(pager.current);
+		}).fail(function(error, obj) {
 			if (obj.error)
 				showMsgDialog(obj.error.info);
 			else if (error === 'http')
